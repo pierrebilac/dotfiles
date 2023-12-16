@@ -1,5 +1,5 @@
 # À propos
-Ce dépot est une de bulle de sauvegarde de la configuration de mon environnement de travail de mon terminal.
+Ce dépot est une de bulle de sauvegarde de la configuration de mon terminal.
 
 ## Prérequis
 - Installer [Homebrew](https://brew.sh/index_fr)
