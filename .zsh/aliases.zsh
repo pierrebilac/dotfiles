@@ -2,7 +2,7 @@ alias tagdate="date '+%Y-%m-%d-%H%M%S'"
 alias edit='code'
 
 # Get OS X Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
-alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; brew doctor; sudo gem update --system; sudo gem update; sudo gem cleanup'
+alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; brew doctor;'
 
 # IP addresses
 alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
@@ -91,24 +91,54 @@ alias cp='cp -i'
 # confirm move
 alias mv='mv -i'
 
-# Versions of PHP installed with HomeBrew
-installedPhpVersions=($(brew ls --versions | ggrep -E 'php(@.*)?\s' | ggrep -oP '(?<=\s)\d\.\d' | uniq | sort))
+# Docker
+alias dc='docker-compose'
+alias dcu='docker-compose up --build'
+alias dcps='docker-compose ps'
+alias dkall='docker kill $(docker ps -q)'
 
-# Alias for every version of PHP installed with HomeBrew
-for phpVersion in ${installedPhpVersions[*]}; do
-    value="{"
+# symfony
+alias sf='symfony'
+alias sfs='symfony serve --no-tls'
+alias sfd='symfony console server:dump'
+alias sfc='symfony console'
+alias sfol='symfony open:local'
 
-    for otherPhpVersion in ${installedPhpVersions[*]}; do
-        if [ "${otherPhpVersion}" = "${phpVersion}" ]; then
-            continue
-        fi
+# Ansible
+alias lans='brew unlink ansible@2.9 && brew link ansible'
+alias lans29='brew unlink ansible && brew link ansible@2.9'
 
-        # unlink other PHP version
-        value="${value} brew unlink php@${otherPhpVersion};"
-    done
+# NVM
+export NVM_DIR="$HOME/.nvm"
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
-    # link desired PHP version
-    value="${value} brew link php@${phpVersion} --force --overwrite; } &> /dev/null && php -v"
+# Automatically switch node versions when a directory has a `.nvmrc` file
+autoload -U add-zsh-hook
+# Zsh hook function
+load-nvmrc() {
+    local node_version="$(nvm version)" # Current node version
+    local nvmrc_path="$(nvm_find_nvmrc)" # Path to the .nvmrc file
 
-    alias "${phpVersion}"="${value}"
-done
+    # Check if there exists a .nvmrc file
+    if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    # Check if the node version in .nvmrc is installed on the computer
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+        # Install the node version in .nvmrc on the computer and switch to that node version
+        nvm install
+    # Check if the current node version matches the version in .nvmrc
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+        # Switch node versions
+        nvm use
+    fi
+    # If there isn't an .nvmrc make sure to set the current node version to the default node version
+    elif [ "$node_version" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+    fi
+}
+# Add the above function when the present working directory (pwd) changes
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
